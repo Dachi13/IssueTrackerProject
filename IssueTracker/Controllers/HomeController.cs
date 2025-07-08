@@ -1,7 +1,3 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
-using IssueTracker.Models;
-
 namespace IssueTracker.Controllers;
 
 public class HomeController(ILogger<HomeController> logger) : Controller
