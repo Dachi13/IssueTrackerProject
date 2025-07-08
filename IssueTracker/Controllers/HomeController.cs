@@ -4,7 +4,22 @@ public class HomeController(ILogger<HomeController> logger) : Controller
 {
     public IActionResult Index()
     {
-        return View();
+        var tickets = new List<Ticket>()
+        {
+            new Ticket()
+            {
+                Priority = Priority.High,
+                Title = "Bug with project",
+                Status = Status.Open
+            },
+            new Ticket()
+            {
+                Priority = Priority.High,
+                Title = "Naming",
+                Status = Status.Open
+            }
+        };
+        return View(tickets);
     }
 
     public IActionResult Privacy()

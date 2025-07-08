@@ -1,3 +1,4 @@
 global using System.Diagnostics;
 global using Microsoft.AspNetCore.Mvc;
 global using IssueTracker.Models;
+global using IssueTracker.Models.Enums;
