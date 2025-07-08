@@ -8,15 +8,19 @@ public class HomeController(ILogger<HomeController> logger) : Controller
         {
             new Ticket()
             {
+                Id = 1,
                 Priority = Priority.High,
                 Title = "Bug with project",
-                Status = Status.Open
+                Status = Status.Open,
+                CreatedDate = DateTime.Now
             },
             new Ticket()
             {
+                Id = 2,
                 Priority = Priority.High,
                 Title = "Naming",
-                Status = Status.Open
+                Status = Status.Open,
+                CreatedDate = DateTime.Now
             }
         };
         return View(tickets);
