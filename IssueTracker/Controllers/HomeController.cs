@@ -4,25 +4,8 @@ public class HomeController(ILogger<HomeController> logger, ApplicationDbContext
 {
     public IActionResult Index()
     {
-        var tickets = new List<Ticket>()
-        {
-            new Ticket()
-            {
-                Id = 1,
-                Priority = Priority.High,
-                Title = "Bug with project",
-                Status = Status.Open,
-                CreatedDate = DateTime.Now
-            },
-            new Ticket()
-            {
-                Id = 2,
-                Priority = Priority.High,
-                Title = "Naming",
-                Status = Status.Open,
-                CreatedDate = DateTime.Now
-            }
-        };
+        var tickets = context.Tickets.AsEnumerable();
+
         return View(tickets);
     }
 
@@ -32,7 +15,7 @@ public class HomeController(ILogger<HomeController> logger, ApplicationDbContext
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken] 
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Ticket ticket)
     {
         if (!ModelState.IsValid) return View(ticket);
@@ -40,12 +23,47 @@ public class HomeController(ILogger<HomeController> logger, ApplicationDbContext
         ticket.Status = Status.Open;
         ticket.CreatedDate = DateTime.Now;
 
-        // save to db
         context.Tickets.Add(ticket);
         await context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Index));
     }
+
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id is null) return NotFound();
+
+        var ticket = await context.Tickets.FindAsync(id);
+
+        if (ticket is null) return NotFound();
+
+        return View(ticket);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, Ticket ticket)
+    {
+        if (id != ticket.Id) return NotFound();
+
+        if (!ModelState.IsValid) return View(ticket);
+
+        try
+        {
+            context.Update(ticket);
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // This is an advanced case, but good to know:
+            // It handles when someone else edits the same record at the same time.
+            // We just re-throw for now.
+            throw;
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
 
     public IActionResult Privacy()
     {
