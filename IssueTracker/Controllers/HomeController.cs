@@ -1,6 +1,6 @@
 namespace IssueTracker.Controllers;
 
-public class HomeController(ILogger<HomeController> logger) : Controller
+public class HomeController(ILogger<HomeController> logger, ApplicationDbContext context) : Controller
 {
     public IActionResult Index()
     {
@@ -24,6 +24,27 @@ public class HomeController(ILogger<HomeController> logger) : Controller
             }
         };
         return View(tickets);
+    }
+
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken] 
+    public async Task<IActionResult> Create(Ticket ticket)
+    {
+        if (!ModelState.IsValid) return View(ticket);
+
+        ticket.Status = Status.Open;
+        ticket.CreatedDate = DateTime.Now;
+
+        // save to db
+        context.Tickets.Add(ticket);
+        await context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Index));
     }
 
     public IActionResult Privacy()

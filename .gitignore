@@ -35,7 +35,7 @@ bld/
 # [Mm]igrations/
 .idea
 [Ii]nternal_logs/
-
+IssueTracker/Data/Migrations
 # NLog config file
 nlog.config
 

@@ -1,8 +1,14 @@
-﻿@model List<Ticket>
+﻿@model IEnumerable<Ticket>
 
 @{
     ViewData["Title"] = "Home Page";
 }
+
+<h1>Ticket List</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Ticket</a>
+</p>
 
 <div class="text-center">
     <h2>Tickets</h2>
