@@ -1,6 +1,6 @@
 namespace IssueTracker.Controllers;
 
-public class HomeController(ILogger<HomeController> logger, ApplicationDbContext context) : Controller
+public class HomeController(ApplicationDbContext context) : Controller
 {
     public IActionResult Index()
     {
@@ -24,6 +24,21 @@ public class HomeController(ILogger<HomeController> logger, ApplicationDbContext
         ticket.CreatedDate = DateTime.Now;
 
         context.Tickets.Add(ticket);
+        await context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpDelete("/api/tickets/{id}")]
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id is null) return NotFound();
+
+        var ticket = await context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
+
+        if (ticket is null) return NotFound();
+
+        context.Tickets.Remove(ticket);
         await context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Index));
