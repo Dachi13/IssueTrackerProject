@@ -1,10 +1,10 @@
 namespace IssueTracker.Controllers;
 
-public class HomeController(ApplicationDbContext context) : Controller
+public class TicketsApiController(ITicketRepository repository) : Controller
 {
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        var tickets = context.Tickets.AsEnumerable();
+        var tickets = await repository.GetAllAsync();
 
         return View(tickets);
     }
@@ -23,8 +23,7 @@ public class HomeController(ApplicationDbContext context) : Controller
         ticket.Status = Status.Open;
         ticket.CreatedDate = DateTime.Now;
 
-        context.Tickets.Add(ticket);
-        await context.SaveChangesAsync();
+        await repository.CreateAsync(ticket);
 
         return RedirectToAction(nameof(Index));
     }
@@ -34,12 +33,11 @@ public class HomeController(ApplicationDbContext context) : Controller
     {
         if (id is null) return NotFound();
 
-        var ticket = await context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
+        var ticket = await repository.GetByIdAsync(id.Value);
 
         if (ticket is null) return NotFound();
 
-        context.Tickets.Remove(ticket);
-        await context.SaveChangesAsync();
+        repository.Delete(ticket);
 
         return RedirectToAction(nameof(Index));
     }
@@ -47,7 +45,7 @@ public class HomeController(ApplicationDbContext context) : Controller
     [HttpGet("get/ticket/{id}")]
     public async Task<IActionResult> GetTicket(int id)
     {
-        var ticket = await context.Tickets.FindAsync(id);
+        var ticket = await repository.GetByIdAsync(id);
 
         if (ticket is null) return NotFound();
 
@@ -58,25 +56,7 @@ public class HomeController(ApplicationDbContext context) : Controller
     [HttpPut("edit/ticket")]
     public async Task<IActionResult> PutTicket(Ticket ticket)
     {
-        context.Attach(ticket);
-
-        var entry = context.Entry(ticket);
-
-        foreach (var property in entry.Properties)
-        {
-            if (property.Metadata.Name != nameof(ticket.CreatedDate) &&
-                property.Metadata.Name != nameof(ticket.Id)) property.IsModified = true;
-        }
-
-        try
-        {
-            await context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!context.Tickets.Any(e => e.Id == ticket.Id)) return NotFound();
-            throw;
-        }
+        await repository.UpdateAsync(ticket);
 
         return Ok();
     }
