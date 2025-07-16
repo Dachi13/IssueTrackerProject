@@ -2,7 +2,7 @@ namespace IssueTracker.Models.Enums;
 
 public enum Priority
 {
-    High,
+    Low,
     Medium,
-    Low
+    High
 }

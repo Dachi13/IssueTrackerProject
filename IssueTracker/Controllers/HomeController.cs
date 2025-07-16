@@ -29,7 +29,7 @@ public class HomeController(ApplicationDbContext context) : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    [HttpDelete("/api/tickets/{id}")]
+    [HttpDelete("delete/tickets/{id}")]
     public async Task<IActionResult> Delete(int? id)
     {
         if (id is null) return NotFound();
@@ -44,41 +44,42 @@ public class HomeController(ApplicationDbContext context) : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    public async Task<IActionResult> Edit(int? id)
+    [HttpGet("get/ticket/{id}")]
+    public async Task<IActionResult> GetTicket(int id)
     {
-        if (id is null) return NotFound();
-
         var ticket = await context.Tickets.FindAsync(id);
 
         if (ticket is null) return NotFound();
 
-        return View(ticket);
+        return Ok(ticket);
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Ticket ticket)
-    {
-        if (id != ticket.Id) return NotFound();
 
-        if (!ModelState.IsValid) return View(ticket);
+    [HttpPut("edit/ticket")]
+    public async Task<IActionResult> PutTicket(Ticket ticket)
+    {
+        context.Attach(ticket);
+
+        var entry = context.Entry(ticket);
+
+        foreach (var property in entry.Properties)
+        {
+            if (property.Metadata.Name != nameof(ticket.CreatedDate) &&
+                property.Metadata.Name != nameof(ticket.Id)) property.IsModified = true;
+        }
 
         try
         {
-            context.Update(ticket);
             await context.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException)
         {
-            // This is an advanced case, but good to know:
-            // It handles when someone else edits the same record at the same time.
-            // We just re-throw for now.
+            if (!context.Tickets.Any(e => e.Id == ticket.Id)) return NotFound();
             throw;
         }
 
-        return RedirectToAction(nameof(Index));
+        return Ok();
     }
-
 
     public IActionResult Privacy()
     {
