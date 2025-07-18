@@ -35,8 +35,9 @@ public class TicketRepository(ApplicationDbContext context) : ITicketRepository
         await context.SaveChangesAsync();
     }
 
-    public void Delete(Ticket ticket)
+    public async Task DeleteAsync(Ticket ticket)
     {
         context.Tickets.Remove(ticket);
+        await context.SaveChangesAsync();
     }
 }

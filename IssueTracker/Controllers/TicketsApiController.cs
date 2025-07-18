@@ -9,18 +9,11 @@ public class TicketsApiController(ITicketRepository repository) : Controller
         return View(tickets);
     }
 
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
+    [HttpPost("create/ticket")]
     public async Task<IActionResult> Create(Ticket ticket)
     {
-        if (!ModelState.IsValid) return View(ticket);
+        if (!ModelState.IsValid) return Error();
 
-        ticket.Status = Status.Open;
         ticket.CreatedDate = DateTime.Now;
 
         await repository.CreateAsync(ticket);
@@ -37,7 +30,7 @@ public class TicketsApiController(ITicketRepository repository) : Controller
 
         if (ticket is null) return NotFound();
 
-        repository.Delete(ticket);
+        await repository.DeleteAsync(ticket);
 
         return RedirectToAction(nameof(Index));
     }

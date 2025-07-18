@@ -12,9 +12,11 @@
             method: 'DELETE',
             success: function () {
                 $('#deleteConfirmModal').modal('hide');
-                $('button[data-ticket-id="' + ticketIdToDelete + '"]').closest('tr').fadeOut(500, function () {
+                $('button[data-ticket-id="' + ticketIdToDelete + '"]').closest('.col-md-4').fadeOut(500, function () {
                     $(this).remove();
                 });
+                var alertHtml = '<div class="alert alert-info alert-dismissible fade show" role="alert">Ticket has been deleted.<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+                $('#alert-placeholder').html(alertHtml).delay(3000).fadeOut('slow');
             },
             error: function () {
                 alert('Error: Could not delete the ticket.');
@@ -75,4 +77,59 @@
         });
     });
 
+    $('#createTicketBtn').on('click', function () {
+        var ticketData = {
+            Title: $('#ticket-title').val(),
+            Description: $('#ticket-description').val(),
+            Priority: $('#ticket-priority').val(),
+            Status: $('#ticket-status').val()
+        };
+
+        $.ajax({
+            url: 'create/ticket',
+            method: 'POST',
+            data: ticketData,
+            success: function () {
+                window.location.href = "/";
+
+                var alertHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">Ticket created successfully!<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+                $('#alert-placeholder').html(alertHtml).fadeIn().delay(5000).fadeOut('slow');
+
+            },
+            error: function () {
+                var errorHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">Error: Could not create ticket.<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+                $('#alert-placeholder').html(errorHtml);
+            }
+        })
+    })
+
+    $('.view-details-btn').on('click', function() {
+        var ticketId = $(this).data('ticket-id');
+
+        $('#details-title').text('Loading...');
+        $('#details-description').text('');
+        $('#details-status').text('');
+        $('#details-priority').text('');
+        $('#details-created').text('');
+
+        $.ajax({
+            url: '/get/ticket/' + ticketId,
+            method: 'GET',
+            success: function(ticket) {
+                var statusText = ["Open", "InProgress", "Closed"][ticket.status];
+                var priorityText = ["Low", "Medium", "High"][ticket.priority];
+                var createdDate = new Date(ticket.createdDate).toLocaleDateString();
+
+                $('#details-title').text(ticket.title);
+                $('#details-description').text(ticket.description);
+                $('#details-status').text(statusText);
+                $('#details-priority').text(priorityText);
+                $('#details-created').text(createdDate);
+            },
+            error: function() {
+                $('#details-title').text('Error');
+                $('#details-description').text('Could not load ticket details.');
+            }
+        });
+    }); 
 });
